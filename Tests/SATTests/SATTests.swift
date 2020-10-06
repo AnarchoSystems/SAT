@@ -1,5 +1,5 @@
 import XCTest
-@testable import SAT
+import SAT
 
 final class SATTests: XCTestCase {
     

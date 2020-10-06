@@ -14,7 +14,7 @@ infix operator <=> : AssignmentPrecedence
 
 
 ///Encapsulates a logical proposition.
-enum Prop : ExpressibleByStringLiteral {
+public enum Prop : ExpressibleByStringLiteral {
     ///The proposition is just a variable.
     case atom(name: String)
     ///Conjunction of two propositions.
@@ -25,10 +25,16 @@ enum Prop : ExpressibleByStringLiteral {
     indirect case not(Prop)
     
     //Enables code like ```let a : Prop = "A"```
-    init(stringLiteral value: String) {
+    public init(stringLiteral value: String) {
         self = .atom(name: value)
     }
     
+}
+
+
+public extension Prop {
+    
+
     ///The conjunction of lhs and rhs.
     /// - Returns: .and(lhs, rhs)
     static func &&(lhs: Prop, rhs: Prop) -> Prop {

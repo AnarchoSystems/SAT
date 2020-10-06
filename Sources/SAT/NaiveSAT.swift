@@ -9,7 +9,7 @@ import Foundation
 
 
 
-extension Prop {
+public extension Prop {
     
     ///Computes if there is an assignment of variables making this proposition true.
     var isSatisfiable : Bool {
@@ -38,7 +38,14 @@ extension Prop {
     }
     
     
-    private func naiveWitnesses<C : Collection>(for variables: C) -> [String : Bool]? where C.Element == String {
+}
+
+
+internal extension Prop {
+    
+    
+    @usableFromInline
+     func naiveWitnesses<C : Collection>(for variables: C) -> [String : Bool]? where C.Element == String {
         
         //get the first element of the nonempty collection
         let member = variables.first!
@@ -57,7 +64,8 @@ extension Prop {
     }
     
     
-    private func recWitnesses<C : Collection>(for variables: C,
+    @usableFromInline
+     func recWitnesses<C : Collection>(for variables: C,
                                               assigning name: String,
                                               to value: Bool) -> [String : Bool]? where C.Element == String {
         
