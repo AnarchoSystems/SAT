@@ -1,3 +1,3 @@
 # SAT
 
-A description of this package.
+https://en.wikipedia.org/wiki/Satisfiability
