@@ -36,35 +36,26 @@ final class SATTests: XCTestCase {
     
     
     
-    func testUnsat() {
+    func testDNFSimple() {
         
         let nVars = 500
         
         let vars = (0..<nVars).map{"V\($0)"}
         
-        let nHalf = nVars / 2
-        
-        var prop : Prop = .atom(name: vars[0])
-        
-        for (idx, name) in vars.enumerated().dropFirst() {
-            
-            if idx == nHalf {
-                prop = prop && !.atom(name: vars.last!)
-            }
-            
-            prop = prop && .atom(name: name)
-            
+        let assignments = (0..<250).map{_ in
+            Dictionary(uniqueKeysWithValues: vars.map{($0, Bool.random())})
         }
         
-        if nil != prop.naiveWitnesses() {
+        let prop = assignments.dropFirst().lazy.map{$0.knf()!}
+            .reduce(assignments.first!.knf()!, ||)
+        
+        guard let actualAsg = prop.naiveWitnesses() else {
             return XCTFail()
         }
         
-        guard let actualAsg = (!prop).naiveWitnesses() else {
-            return XCTFail()
-        }
+        XCTAssert(assignments.contains(actualAsg))
         
-        switch (!prop).evaluate(assignments: actualAsg) {
+        switch (prop).evaluate(assignments: actualAsg) {
          
         case .value(let bool):
             
@@ -78,10 +69,57 @@ final class SATTests: XCTestCase {
         
     }
     
+    func testHardInstance() {
+        
+        let nVars = 500
+        
+        let vars = (0..<nVars).map{"V\($0)"}
+        
+        let disjunctions = (0..<500).lazy.map{_ in
+            vars.filter{_ in .random()}
+            // (0..<3).map{_ in vars.randomElement()!}//alternative
+        }.compactMap{(vars) -> Prop? in
+            guard let first = vars.first else {
+                return nil
+            }
+            return vars.dropFirst().lazy.map({Bool.random() ? .atom(name: $0) : !.atom(name: $0)}).reduce(Prop.atom(name: first), ||)
+        }
+        
+        guard
+            let first = disjunctions.first,
+            disjunctions.count > 250 else {
+            return testHardInstance()
+        }
+        
+        let prop = disjunctions.dropFirst().reduce(first, &&)
+        
+        if let asg = prop.naiveWitnesses() {
+            switch prop.evaluate(assignments: asg) {
+            case .value(let val):
+                XCTAssert(val)
+            case .prop:
+                XCTFail()
+            }
+        }
+        else {
+            guard let asg = (!prop).naiveWitnesses() else {
+                return XCTFail()
+            }
+            switch prop.evaluate(assignments: asg) {
+            case .value(let val):
+                XCTAssert(val)
+            case .prop:
+                XCTFail()
+            }
+        }
+        
+    }
+    
     
 
     static var allTests = [
         ("testTrivial", testTrivial),
-        ("testUnsat", testUnsat)
+        ("testDNFSimple", testDNFSimple),
+        ("testHardInstance", testHardInstance)
     ]
 }

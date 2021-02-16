@@ -31,6 +31,22 @@ public enum Prop : ExpressibleByStringLiteral {
     
 }
 
+extension Prop : CustomStringConvertible {
+    
+    public var description: String {
+        switch self {
+        case .atom(let name):
+            return name
+        case .and(let p, let q):
+            return "(" + p.description + " && " + q.description + ")"
+        case .or(let p, let q):
+            return "(" + p.description + " || " + q.description + ")"
+        case .not(let p):
+            return "!" + p.description
+        }
+    }
+    
+}
 
 public extension Prop {
     

@@ -92,3 +92,25 @@ internal extension Prop {
     
     
 }
+
+
+
+public extension Dictionary where Key == String, Value == Bool {
+    
+    func knf() -> Prop? {
+        
+        guard var prop = self.first.map({name, value in
+            value ? Prop.atom(name: name) : Prop.not(.atom(name: name))
+        }) else {
+            return nil
+        }
+        
+        for (name, value) in self.dropFirst() {
+            prop = prop && (value ? .atom(name: name) : !.atom(name: name))
+        }
+        
+        return prop
+        
+    }
+    
+}
